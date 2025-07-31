@@ -31,14 +31,14 @@ jobs:
             npm ci
           fi
 
-      - name: Build and export static site
+      - name: Build static site
         run: |
           if [ -f pnpm-lock.yaml ]; then
-            pnpm run build && pnpm run export
+            pnpm run build
           elif [ -f yarn.lock ]; then
-            yarn build && yarn export
+            yarn build
           else
-            npm run build && npm run export
+            npm run build
           fi
 
       - name: Deploy to GitHub Pages
