@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            npm install -g pnpm
+            pnpm install
+          elif [ -f yarn.lock ]; then
+            yarn install --frozen-lockfile
+          else
+            npm ci
+          fi
+
+      - name: Build and export static site
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm run build && pnpm run export
+          elif [ -f yarn.lock ]; then
+            yarn build && yarn export
+          else
+            npm run build && npm run export
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: gh-pages
